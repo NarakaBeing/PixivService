@@ -1,45 +1,44 @@
 package org.itaya.pixivservice.service.impl
 
-import cn.hutool.core.util.ArrayUtil
-import org.itaya.pixivservice.model.ArtworkFilterConfig
-import org.itaya.pixivservice.model.ArtworkFilterConfigImpl
-import org.itaya.pixivservice.model.ArtworkInformationModel
+import org.itaya.pixivservice.model.ArtworkFilter
+import org.itaya.pixivservice.model.ArtworkFilterImpl
+import org.itaya.pixivservice.model.ArtworkInfo
 import org.itaya.pixivservice.service.ArtworkFilterService
 import org.springframework.stereotype.Service
 
 @Service
 class ArtworkFilterServiceImpl: ArtworkFilterService{
-    override fun createFilterConfig(config: (ArtworkFilterConfig) -> Unit): ArtworkFilterConfig {
-        return ArtworkFilterConfigImpl().apply(config)
+    override fun createFilterConfig(config: (ArtworkFilter) -> Unit): ArtworkFilter {
+        return ArtworkFilterImpl.nullFilter().apply(config)
     }
 
     override fun filter(
-        artworkInformationModelList: List<ArtworkInformationModel>,
-        config: ArtworkFilterConfig
-    ): List<ArtworkInformationModel> {
-        val result = ArrayUtil.clone(artworkInformationModelList)
-        config.id?.let { standard -> result.filter { it.id == standard } }
-        config.title?.let { standard -> result.filter { it.title == standard } }
-        config.author?.let { standard -> result.filter { it.author == standard } }
-        config.dateBefore?.let { standard -> result.filter { it.date.before(standard) } }
-        config.dateAfter?.let { standard -> result.filter { it.date.after(standard) } }
-        config.includedTags?.let { standard -> result.filter { it.tag.intersect(standard.toSet()).isNotEmpty() } }
-        config.excludedTags?.let { standard -> result.filter { it.tag.intersect(standard.toSet()).isEmpty() } }
-        config.viewsGreaterThan?.let { standard -> result.filter { it.views > standard } }
-        config.viewsSmallerThan?.let { standard -> result.filter { it.views < standard } }
-        config.likesGreaterThan?.let { standard -> result.filter { it.likes > standard } }
-        config.likesSmallerThan?.let { standard -> result.filter { it.likes < standard } }
-        config.bookmarksGreaterThan?.let { standard -> result.filter { it.bookmarks > standard } }
-        config.bookmarksSmallerThan?.let { standard -> result.filter { it.bookmarks < standard } }
-        config.visibility?.let { standard -> result.filter { it.visibility == standard } }
-        config.format?.let { standard -> result.filter { it.format == standard } }
+        infoList: List<ArtworkInfo>,
+        filter: ArtworkFilter
+    ): List<ArtworkInfo> {
+        var result: List<ArtworkInfo> = ArrayList<ArtworkInfo>().apply {
+            infoList.onEach { add(it) }
+        }
+        filter.author?.let { standard -> result = result.filter { it.author == standard } }
+        filter.dateBefore?.let { standard -> result = result.filter { it.date.before(standard) } }
+        filter.dateAfter?.let { standard -> result = result.filter { it.date.after(standard) } }
+        filter.includedTags?.let { standard -> result = result.filter { it.tag.intersect(standard.toSet()).isNotEmpty() } }
+        filter.excludedTags?.let { standard -> result = result.filter { it.tag.intersect(standard.toSet()).isEmpty() } }
+        filter.viewsGreaterThan?.let { standard -> result = result.filter { it.views > standard } }
+        filter.viewsSmallerThan?.let { standard -> result = result.filter { it.views < standard } }
+        filter.likesGreaterThan?.let { standard -> result = result.filter { it.likes > standard } }
+        filter.likesSmallerThan?.let { standard -> result = result.filter { it.likes < standard } }
+        filter.bookmarksGreaterThan?.let { standard -> result = result.filter { it.bookmarks > standard } }
+        filter.bookmarksSmallerThan?.let { standard -> result = result.filter { it.bookmarks < standard } }
+        filter.visibility?.let { standard -> result = result.filter { it.visibility == standard } }
+        filter.format?.let { standard -> result = result.filter { it.format == standard } }
         return result
     }
 
     override fun filter(
-        artworkInformationModelList: List<ArtworkInformationModel>,
-        config: (ArtworkFilterConfig) -> Unit
-    ): List<ArtworkInformationModel> {
-        return filter(artworkInformationModelList, createFilterConfig(config))
+        infoList: List<ArtworkInfo>,
+        config: (ArtworkFilter) -> Unit
+    ): List<ArtworkInfo> {
+        return filter(infoList, createFilterConfig(config))
     }
 }

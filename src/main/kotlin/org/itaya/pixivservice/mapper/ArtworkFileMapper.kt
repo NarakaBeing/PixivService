@@ -1,9 +1,9 @@
 package org.itaya.pixivservice.mapper
 
-import org.itaya.pixivservice.model.ArtworkInformationModel
+import org.itaya.pixivservice.model.ArtworkInfo
 import java.io.File
+import java.nio.file.Path
 
 interface ArtworkFileMapper {
-    fun downloadArtworkAsFile(artworkInformation: ArtworkInformationModel): List<File>
-    fun downloadArtworksAsFiles(artworkInformationList: List<ArtworkInformationModel>): List<List<File>>
+    fun downloadArtworkAsFile(artworkInformation: ArtworkInfo, downloadPath: Path): List<File>
 }
