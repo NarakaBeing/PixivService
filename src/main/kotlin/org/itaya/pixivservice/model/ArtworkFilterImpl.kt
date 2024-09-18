@@ -53,6 +53,7 @@ class ArtworkFilterImpl(
             bookmarksSmallerThan:$bookmarksSmallerThan
             visibility:$visibility
             format:$format
+            -------------
         """.trimIndent()
     }
 }

@@ -7,17 +7,17 @@ import java.nio.file.Path
 
 interface ArtworkDownloadService {
     fun downloadArtworkAsFile(artwork: ArtworkInfo, downloadPath: Path): List<File>
-    fun downloadArtworkAsFile(artworkList: List<ArtworkInfo>, config: FolderGradingConfigurer.() -> Unit): List<List<File>>
-    fun folderGradingConfig(config: FolderGradingConfigurer.() -> Unit);
+    fun downloadArtworkAsFile(artworkList: List<ArtworkInfo>, config: FolderOrganizer.() -> Unit): List<List<File>>
+    fun organizeFolder(config: FolderOrganizer.() -> Unit);
 
-    interface FolderGradingConfigurer {
-        interface FolderGradingConfig {
+    interface FolderOrganizer {
+        interface FolderOrganizationConfig {
             var folderName: String
             var filterConfig: ArtworkFilter
         }
-        val folderLevelConfigList: ArrayList<Pair<Boolean, MutableList<FolderGradingConfig>>>
+        val folderHierarchyConfigList: ArrayList<Pair<Boolean, MutableList<FolderOrganizationConfig>>>
         fun startAt(downloadPath: Path)
-        fun nextLevel(isReservedSurplus: Boolean);
-        fun addFolder(config: (FolderGradingConfig) -> Unit)
+        fun nextHierarchy(isReservedSurplus: Boolean);
+        fun addFolder(config: FolderOrganizationConfig.() -> Unit)
     }
 }

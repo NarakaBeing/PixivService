@@ -9,9 +9,9 @@ import org.itaya.pixivservice.model.ArtworkFilterImpl
 import org.itaya.pixivservice.model.ArtworkInfo
 import org.itaya.pixivservice.service.ArtworkDownloadService
 import org.itaya.pixivservice.service.ArtworkDownloadService.*
+import org.itaya.pixivservice.service.ArtworkDownloadService.FolderOrganizer.*
 import org.itaya.pixivservice.service.ArtworkFilterService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Path
@@ -21,19 +21,19 @@ class ArtworkDownloadServiceImpl @Autowired constructor(
     val artworkFileMapper: ArtworkFileMapper,
     private val artworkFilterServiceImpl: ArtworkFilterService
 ): ArtworkDownloadService {
-    private var folderConfig: FolderGradingConfigurer = FolderGradingConfigurerImpl()
+    private var folderOrganizer: FolderOrganizer = FolderOrganizerImpl()
 
     override fun downloadArtworkAsFile(artwork: ArtworkInfo, downloadPath: Path): List<File> {
         return artworkFileMapper.downloadArtworkAsFile(artwork, downloadPath)
     }
 
-    override fun downloadArtworkAsFile(artworkList: List<ArtworkInfo>, config: FolderGradingConfigurer.() -> Unit): List<List<File>> {
+    override fun downloadArtworkAsFile(artworkList: List<ArtworkInfo>, config: FolderOrganizer.() -> Unit): List<List<File>> {
         val files: MutableList<List<File>> = ArrayList()
-        val mapper = folderConfig.apply(config).getFullPaths(artworkList)
+        val mapper = folderOrganizer.apply(config).pathsOf(artworkList)
         runBlocking(Dispatchers.IO) {
-            mapper.onEach {
+            mapper.onEach { (artworkInfo, path) ->
                 launch {
-                    val fileList = artworkFileMapper.downloadArtworkAsFile(it.key, it.value)
+                    val fileList = artworkFileMapper.downloadArtworkAsFile(artworkInfo, path)
                     files.add(fileList)
                 }
             }
@@ -41,17 +41,17 @@ class ArtworkDownloadServiceImpl @Autowired constructor(
         return files
     }
 
-    override fun folderGradingConfig(config: FolderGradingConfigurer.() -> Unit) {
-        folderConfig.apply(config)
+    override fun organizeFolder(config: FolderOrganizer.() -> Unit) {
+        folderOrganizer.apply(config)
     }
 
-    private fun FolderGradingConfigurer.getFullPaths(infoList: List<ArtworkInfo>): Map<ArtworkInfo, Path> {
+    private fun FolderOrganizer.pathsOf(infoList: List<ArtworkInfo>): Map<ArtworkInfo, Path> {
         val result = HashMap<ArtworkInfo, Path>()
-        folderLevelConfigList.onEach {folderLevelConfig ->
+        folderHierarchyConfigList.onEach { folderHierarchyConfig ->
             val pendingList = ArrayList<ArtworkInfo>().apply { infoList.map { add(it) } }
-            val isReservedSurplus = folderLevelConfig.first
-            val folderLevel = folderLevelConfig.second
-            folderLevel.onEach { folderConfig ->
+            val isReservedSurplus = folderHierarchyConfig.first
+            val folderHierarchy = folderHierarchyConfig.second
+            folderHierarchy.onEach { folderConfig ->
                 val filtrate = artworkFilterServiceImpl.filter(pendingList, folderConfig.filterConfig)
                 for (it in filtrate) {
                     result[it] = if (result[it] == null) Path.of(folderConfig.folderName)
@@ -64,29 +64,29 @@ class ArtworkDownloadServiceImpl @Autowired constructor(
         return result
     }
 
-    class FolderGradingConfigurerImpl: FolderGradingConfigurer {
-        class FolderGradingConfigImpl: FolderGradingConfigurer.FolderGradingConfig {
+    class FolderOrganizerImpl: FolderOrganizer {
+        class FolderOrganizationConfigImpl: FolderOrganizationConfig {
             override var folderName: String = "nameless"
             override var filterConfig: ArtworkFilter = ArtworkFilterImpl.nullFilter()
         }
-        override val folderLevelConfigList = ArrayList<Pair<Boolean, MutableList<FolderGradingConfigurer.FolderGradingConfig>>>()
-        private var levelCount = 0
+        override val folderHierarchyConfigList = ArrayList<Pair<Boolean, MutableList<FolderOrganizationConfig>>>()
+        private var hierarchyCount = 0
 
         override fun startAt(downloadPath: Path) {
-            folderLevelConfigList.add(
-                Pair(false, ArrayList<FolderGradingConfigurer.FolderGradingConfig>().apply {
-                    add(FolderGradingConfigImpl().apply { folderName = downloadPath.toString() })
+            folderHierarchyConfigList.add(
+                Pair(false, ArrayList<FolderOrganizationConfig>().apply {
+                    add(FolderOrganizationConfigImpl().apply { folderName = downloadPath.toString() })
                 })
             )
         }
 
-        override fun nextLevel(isReservedSurplus: Boolean) {
-            levelCount++
-            folderLevelConfigList.add(Pair(isReservedSurplus, ArrayList()))
+        override fun nextHierarchy(isReservedSurplus: Boolean) {
+            hierarchyCount++
+            folderHierarchyConfigList.add(Pair(isReservedSurplus, ArrayList()))
         }
 
-        override fun addFolder(config: (FolderGradingConfigurer.FolderGradingConfig) -> Unit) {
-            folderLevelConfigList[levelCount].second.add(FolderGradingConfigImpl().apply(config))
+        override fun addFolder(config: FolderOrganizationConfig.() -> Unit) {
+            folderHierarchyConfigList[hierarchyCount].second.add(FolderOrganizationConfigImpl().apply(config))
         }
     }
 }

@@ -26,6 +26,7 @@ class ArtworkInfoImpl(
             bookmarks:$bookmarks
             visibility:$visibility
             format:$format
+            -------------
         """.trimIndent()
     }
 }

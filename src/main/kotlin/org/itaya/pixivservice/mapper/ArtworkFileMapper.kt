@@ -5,5 +5,5 @@ import java.io.File
 import java.nio.file.Path
 
 interface ArtworkFileMapper {
-    fun downloadArtworkAsFile(artworkInformation: ArtworkInfo, downloadPath: Path): List<File>
+    fun downloadArtworkAsFile(artworkInfo: ArtworkInfo, downloadPath: Path): List<File>
 }

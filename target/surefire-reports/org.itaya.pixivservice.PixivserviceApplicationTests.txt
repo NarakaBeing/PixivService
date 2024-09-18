@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: org.itaya.pixivservice.PixivserviceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 2.337 s <<< FAILURE! -- in org.itaya.pixivservice.PixivserviceApplicationTests
+org.itaya.pixivservice.PixivserviceApplicationTests.example -- Time elapsed: 0.980 s <<< ERROR!
+java.lang.ClassCastException: class cn.hutool.json.JSONArray cannot be cast to class cn.hutool.json.JSONObject (cn.hutool.json.JSONArray and cn.hutool.json.JSONObject are in unnamed module of loader 'app')
+	at cn.hutool.json.JSONGetter.getJSONObject(JSONGetter.java:98)
+	at org.itaya.pixivservice.mapper.impl.PlateBaseArtworkMapperImpl.selectByRecommendedWorks(PlateBaseArtworkMapperImpl.kt:67)
+	at org.itaya.pixivservice.mapper.impl.PlateBaseArtworkMapperImpl.selectByRecommendedWorks(PlateBaseArtworkMapperImpl.kt:78)
+	at org.itaya.pixivservice.service.impl.ArtworkSelectServiceImpl$ArtworkID.selectRecommended(ArtworkSelectServiceImpl.kt:24)
+	at org.itaya.pixivservice.PixivserviceApplicationTests$example$1.invoke(PixivserviceApplicationTests.kt:20)
+	at org.itaya.pixivservice.PixivserviceApplicationTests$example$1.invoke(PixivserviceApplicationTests.kt:19)
+	at org.itaya.pixivservice.service.impl.ArtworkSelectServiceImpl.selectionBaseOnArtworkID(ArtworkSelectServiceImpl.kt:138)
+	at org.itaya.pixivservice.PixivserviceApplicationTests.example(PixivserviceApplicationTests.kt:19)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+

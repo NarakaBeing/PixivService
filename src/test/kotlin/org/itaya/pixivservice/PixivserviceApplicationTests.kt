@@ -9,35 +9,35 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.nio.file.Path
 
 @SpringBootTest
-class PixivserviceApplicationTests @Autowired constructor(
-    val artworkSelectService: ArtworkSelectService,
-    val artworkDownloadService: ArtworkDownloadService
-) {
+class PixivserviceApplicationTests {
     @Test
     fun example() {
-        val idList = ArrayList<ArtworkInfo>();
-        artworkSelectService.selectionBaseOnArtworkID {
-            idList.addAll(selectRecommended(50))
-        }
-        artworkDownloadService.downloadArtworkAsFile(idList) {
-            startAt(Path.of("download"))
-            nextLevel(true)
-            addFolder {
-                it.folderName = "SFW"
-                it.filterConfig.visibility = ArtworkInfo.Visibility.SFW
+        PixivServiceStartup.setCookie("")
+        PixivServiceStartup.startup { selector, filter, downloader ->
+            val idList = ArrayList<ArtworkInfo>();
+            selector.selectionBaseOnArtworkID {
+                idList.addAll(selectRecommended(50))
             }
-            addFolder {
-                it.folderName = "NSFW"
-                it.filterConfig.visibility = ArtworkInfo.Visibility.NSFW
-            }
-            nextLevel(true)
-            addFolder {
-                it.folderName = "viewsGreaterThan3000"
-                it.filterConfig.viewsGreaterThan = 3000
-            }
-            addFolder {
-                it.folderName = "viewsSmallerThan3000"
-                it.filterConfig.viewsSmallerThan = 3000
+            downloader.downloadArtworkAsFile(idList) {
+                startAt(Path.of("download"))
+                nextHierarchy(true)
+                addFolder {
+                    folderName = "SFW"
+                    filterConfig.visibility = ArtworkInfo.Visibility.SFW
+                }
+                addFolder {
+                    folderName = "NSFW"
+                    filterConfig.visibility = ArtworkInfo.Visibility.NSFW
+                }
+                nextHierarchy(true)
+                addFolder {
+                    folderName = "viewsGreaterThan3000"
+                    filterConfig.viewsGreaterThan = 3000
+                }
+                addFolder {
+                    folderName = "viewsSmallerThan3000"
+                    filterConfig.viewsSmallerThan = 3000
+                }
             }
         }
     }

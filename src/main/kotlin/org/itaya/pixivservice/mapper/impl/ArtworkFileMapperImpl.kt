@@ -18,10 +18,10 @@ import javax.imageio.ImageIO
 
 @Repository
 class ArtworkFileMapperImpl @Autowired constructor(val httpRequest: HttpRequest): ArtworkFileMapper {
-    override fun downloadArtworkAsFile(artworkInformation: ArtworkInfo, downloadPath: Path): List<File> {
-        return when (artworkInformation.format) {
-            ArtworkInfo.Format.IMG -> downloadIMGs(artworkInformation, downloadPath)
-            ArtworkInfo.Format.GIF -> downloadGIF(artworkInformation, downloadPath)
+    override fun downloadArtworkAsFile(artworkInfo: ArtworkInfo, downloadPath: Path): List<File> {
+        return when (artworkInfo.format) {
+            ArtworkInfo.Format.IMG -> downloadIMGs(artworkInfo, downloadPath)
+            ArtworkInfo.Format.GIF -> downloadGIF(artworkInfo, downloadPath)
         }
     }
 
@@ -65,7 +65,7 @@ class ArtworkFileMapperImpl @Autowired constructor(val httpRequest: HttpRequest)
         httpRequest.downloadFile(srcUrl, zipFileDest)
         val frameList = ZipUtil.unzip(zipFileDest, unzipFileDest).listFiles()!!.map { ImageIO.read(it) }
 
-        val name = "${artworkInfo.id}.gif"
+        val name = "${artworkInfo.title}.gif"
         val gifFileDest = Path.of(downloadPath.toString(), name).toFile()
 
         FileUtil.mkdir(downloadPath)
